@@ -4,7 +4,24 @@ import ServerTable from "../components/ServerTable"
 import ComplianceChart from "../charts/ComplianceChart"
 import ThreatChart from "../charts/ThreatChart"
 
+import { useEffect, useState } from "react"
+
 function Dashboard() {
+    const [dashboardData, setDashboardData] = useState(null)
+
+    useEffect(() => {
+
+        fetch("http://127.0.0.1:5000/dashboard")
+            .then((response) => response.json())
+            .then((data) => {
+                setDashboardData(data)
+            })
+
+    }, [])
+
+    if (!dashboardData) {
+        return <h1 className="p-8">Loading...</h1>
+    }
     return (
         <div className="flex-1 p-8 overflow-auto bg-gray-100">
 
@@ -26,25 +43,25 @@ function Dashboard() {
 
                 <DashboardCard
                     title="Total Servers"
-                    value="12"
+                    value={dashboardData.total_servers}
                     color="text-gray-700"
                 />
 
                 <DashboardCard
                     title="Compliance Score"
-                    value="87%"
+                    value={`${dashboardData.compliance_score}%`}
                     color="text-green-600"
                 />
 
                 <DashboardCard
                     title="Active Alerts"
-                    value="5"
+                    value={dashboardData.active_alerts}
                     color="text-red-600"
                 />
 
                 <DashboardCard
                     title="Risk Level"
-                    value="Medium"
+                    value={dashboardData.risk_level}
                     color="text-yellow-600"
                 />
 
