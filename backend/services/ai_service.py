@@ -1,67 +1,78 @@
+import requests
+
+
 def generate_ai_explanation(rule, status):
 
-    explanations = {
+    prompt = f"""
+    You are a cybersecurity compliance AI assistant.
 
-        "Firewall Status": {
-            "FAIL": {
-                "risk":
-                "Firewall is disabled which may expose the server to unauthorized inbound traffic.",
+    Compliance Rule: {rule}
+    Status: {status}
 
-                "recommendation":
-                "Enable firewall using: sudo ufw enable"
-            },
+    Explain:
+    1. Security risk
+    2. Recommended remediation
 
-            "PASS": {
-                "risk":
-                "Firewall protection is active and reducing external attack surface.",
+    Respond STRICTLY in this format:
 
-                "recommendation":
-                "Continue monitoring firewall policies regularly."
+    RISK:
+    <risk explanation>
+
+    RECOMMENDATION:
+    <recommendation>
+    """
+
+    try:
+
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "llama3.2",
+                "prompt": prompt,
+                "stream": False
             }
-        },
+        )
 
+        data = response.json()
 
-        "SSH Root Login": {
-            "FAIL": {
-                "risk":
-                "Root SSH login may allow attackers to gain full system access through brute-force attacks.",
+        print(data)
 
-                "recommendation":
-                "Disable root login in /etc/ssh/sshd_config."
-            },
+        ai_text = data.get("response", "")
 
-            "PASS": {
-                "risk":
-                "Root login is disabled which improves SSH security posture.",
+        if not ai_text:
 
-                "recommendation":
-                "Maintain strict SSH authentication policies."
+            return {
+                "risk": "No AI response generated.",
+                "recommendation": "Try again."
             }
-        },
 
+        risk = ""
+        recommendation = ""
 
-        "Disk Usage": {
-            "PASS": {
-                "risk":
-                "Disk usage appears healthy and system storage is operating normally.",
+        if "RECOMMENDATION:" in ai_text:
 
-                "recommendation":
-                "Continue monitoring disk utilization trends."
-            }
+            parts = ai_text.split("RECOMMENDATION:")
+
+            risk = parts[0].replace(
+                "RISK:",
+                ""
+            ).strip()
+
+            recommendation = parts[1].strip()
+
+        else:
+
+            risk = ai_text
+            recommendation = "No recommendation generated."
+
+        return {
+            "risk": risk,
+            "recommendation": recommendation
         }
-    }
 
-    if (
-        rule in explanations and
-        status in explanations[rule]
-    ):
+    except Exception as e:
 
-        return explanations[rule][status]
-
-    return {
-        "risk":
-        "No AI explanation available.",
-
-        "recommendation":
-        "Manual review recommended."
-    }
+        return {
+            "risk": "AI generation failed.",
+            "recommendation": str(e)
+        }

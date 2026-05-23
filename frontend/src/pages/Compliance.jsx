@@ -32,6 +32,11 @@ function Compliance() {
 
     setReport(data)
 
+    localStorage.setItem(
+      "ai_report",
+      JSON.stringify(data)
+    )
+
     setLoading(false)
   }
 
@@ -156,10 +161,9 @@ function Compliance() {
                     <td
                       className={`
                         py-4 font-bold
-                        ${
-                          result.status === "PASS"
-                            ? "text-green-600"
-                            : result.status === "FAIL"
+                        ${result.status === "PASS"
+                          ? "text-green-600"
+                          : result.status === "FAIL"
                             ? "text-red-600"
                             : "text-yellow-600"
                         }
