@@ -2,6 +2,9 @@ from services.ssh_service import (
     run_ssh_command
 )
 
+from services.ai_service import (
+    generate_ai_explanation
+)
 
 # CHECK 1 — Firewall
 def check_firewall(ip, username, password):
@@ -10,25 +13,42 @@ def check_firewall(ip, username, password):
         ip,
         username,
         password,
-        "sudo ufw status"
+        "sudo -S ufw status"
     )
 
     if result["success"]:
 
         output = result["output"]
+        print(output)
 
         if "Status: active" in output:
+
+            ai = generate_ai_explanation(
+                "Firewall Status",
+                "PASS"
+            )
 
             return {
                 "rule": "Firewall Status",
                 "status": "PASS",
-                "details": "Firewall is active"
+                "details": "Firewall is active",
+
+                "risk": ai["risk"],
+                "recommendation": ai["recommendation"]
             }
+
+        ai = generate_ai_explanation(
+            "Firewall Status",
+            "FAIL"
+        )
 
         return {
             "rule": "Firewall Status",
             "status": "FAIL",
-            "details": "Firewall is disabled"
+            "details": "Firewall is disabled",
+
+            "risk": ai["risk"],
+            "recommendation": ai["recommendation"]
         }
 
     return {
@@ -54,16 +74,32 @@ def check_root_login(ip, username, password):
 
         if "PermitRootLogin no" in output:
 
+            ai = generate_ai_explanation(
+                "SSH Root Login",
+                "PASS"
+            )
+
             return {
                 "rule": "SSH Root Login",
                 "status": "PASS",
-                "details": "Root login disabled"
+                "details": "Root login disabled",
+
+                "risk": ai["risk"],
+                "recommendation": ai["recommendation"]
             }
+
+        ai = generate_ai_explanation(
+            "SSH Root Login",
+            "FAIL"
+        )
 
         return {
             "rule": "SSH Root Login",
             "status": "FAIL",
-            "details": "Root login may be enabled"
+            "details": "Root login may be enabled",
+
+            "risk": ai["risk"],
+            "recommendation": ai["recommendation"]
         }
 
     return {
@@ -87,10 +123,18 @@ def check_disk_usage(ip, username, password):
 
         output = result["output"]
 
+        ai = generate_ai_explanation(
+            "Disk Usage",
+            "PASS"
+        )
+
         return {
             "rule": "Disk Usage",
             "status": "PASS",
-            "details": output
+            "details": output,
+
+            "risk": ai["risk"],
+            "recommendation": ai["recommendation"]
         }
 
     return {

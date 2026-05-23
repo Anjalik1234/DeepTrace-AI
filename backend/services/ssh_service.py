@@ -17,7 +17,12 @@ def run_ssh_command(ip, username, password, command):
             password=password
         )
 
-        stdin, stdout, stderr = client.exec_command(command)
+        stdin, stdout, stderr = client.exec_command(
+            command
+        )
+
+        stdin.write(password + "\n")
+        stdin.flush()
 
         output = stdout.read().decode()
 
