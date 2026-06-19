@@ -8,19 +8,58 @@ import {
   CartesianGrid,
 } from "recharts"
 
-function ComplianceChart() {
+import { useEffect, useState } from "react"
 
-  const data = [
-    { day: "Mon", score: 65 },
-    { day: "Tue", score: 72 },
-    { day: "Wed", score: 78 },
-    { day: "Thu", score: 81 },
-    { day: "Fri", score: 87 },
-    { day: "Sat", score: 84 },
-    { day: "Sun", score: 90 },
-  ]
+function ComplianceChart({ ip }) {
+
+  const [data, setData] = useState([])
+
+  const fetchComplianceData = () => {
+
+    if (!ip) return
+
+    fetch(
+      `http://127.0.0.1:5000/compliance/history/${ip}`
+    )
+      .then((response) => response.json())
+      .then((history) => {
+
+        const formattedData =
+          history.map((scan) => ({
+
+            scan: new Date(
+              scan.timestamp
+            ).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit"
+            }),
+
+            score: scan.score
+
+          }))
+
+        setData(formattedData)
+
+      })
+
+  }
+
+  useEffect(() => {
+
+    fetchComplianceData()
+
+    const interval = setInterval(() => {
+
+      fetchComplianceData()
+
+    }, 30000)
+
+    return () => clearInterval(interval)
+
+  }, [ip])
 
   return (
+
     <div className="bg-white p-6 rounded-2xl shadow-md">
 
       <h2 className="text-2xl font-bold mb-6 text-black">
@@ -29,13 +68,18 @@ function ComplianceChart() {
 
       <div className="h-80">
 
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+        >
 
           <LineChart data={data}>
 
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+            />
 
-            <XAxis dataKey="day" />
+            <XAxis dataKey="scan" />
 
             <YAxis />
 
@@ -55,6 +99,7 @@ function ComplianceChart() {
       </div>
 
     </div>
+
   )
 }
 

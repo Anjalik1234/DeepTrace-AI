@@ -2,7 +2,8 @@ from flask import Blueprint
 from flask import request
 
 from services.compliance_service import (
-    run_compliance_scan
+    run_compliance_scan,
+    fetch_compliance_history
 )
 
 compliance_bp = Blueprint(
@@ -26,3 +27,12 @@ def compliance_scan():
     )
 
     return result
+
+
+@compliance_bp.route(
+    "/compliance/history/<ip>",
+    methods=["GET"]
+)
+def compliance_history(ip):
+
+    return fetch_compliance_history(ip)

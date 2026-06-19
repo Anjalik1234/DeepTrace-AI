@@ -1,26 +1,22 @@
+import { useEffect, useState } from "react"
+
 function ServerTable() {
-  const servers = [
-    {
-      id: 1,
-      name: "Production-1",
-      status: "Secure",
-      risk: "Low",
-    },
 
-    {
-      id: 2,
-      name: "Database-Server",
-      status: "Warning",
-      risk: "Medium",
-    },
+  const [servers, setServers] = useState([])
 
-    {
-      id: 3,
-      name: "Auth-Server",
-      status: "Critical",
-      risk: "High",
-    },
-  ]
+  useEffect(() => {
+
+    fetch(
+      "http://127.0.0.1:5000/servers"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+
+        setServers(data)
+
+      })
+
+  }, [])
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-md">
@@ -64,10 +60,9 @@ function ServerTable() {
               <td
                 className={`
                   py-4 font-semibold
-                  ${
-                    server.status === "Secure"
-                      ? "text-green-600"
-                      : server.status === "Warning"
+                  ${server.status === "Secure"
+                    ? "text-green-600"
+                    : server.status === "Warning"
                       ? "text-yellow-600"
                       : "text-red-600"
                   }
@@ -79,10 +74,9 @@ function ServerTable() {
               <td
                 className={`
                   py-4 font-bold
-                  ${
-                    server.risk === "Low"
-                      ? "text-green-600"
-                      : server.risk === "Medium"
+                  ${server.risk === "Low"
+                    ? "text-green-600"
+                    : server.risk === "Medium"
                       ? "text-yellow-600"
                       : "text-red-600"
                   }
